@@ -1,7 +1,8 @@
 from flask import Flask,jsonify,request
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow import fields,Schema
-
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
 import os
 
 base_dir=os.path.dirname(os.path.realpath(__file__))
@@ -11,12 +12,14 @@ base_dir=os.path.dirname(os.path.realpath(__file__))
 
 
 app=Flask(__name__)
+app.secret_key='78fb414825597a7f78b0414f'
 app.config["SQLALCHEMY_DATABASE_URI"]="sqlite:///"+os.path.join(base_dir,"site.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"]=False
+app.config["FLASK_ADMIN_SWATCH"]='cerulean'
 
 
 db=SQLAlchemy(app)
-
+admin=Admin(app,name="Recipe API",template_mode="bootstrap3")
 
 class Recipe(db.Model):
     id=db.Column(db.Integer,primary_key=True)
@@ -43,7 +46,7 @@ class Recipe(db.Model):
         return cls.query.get_or_404(id)
 
 
-
+admin.add_view(ModelView(Recipe,db.session))
 class RecipeSchema(Schema):
     id=fields.Integer()
     name=fields.String()
